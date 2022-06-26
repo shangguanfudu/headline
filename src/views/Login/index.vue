@@ -1,11 +1,16 @@
 <template>
   <div class="login-container">
     <!-- 导航栏 -->
-    <van-nav-bar class="page-nav-bar" title="登录" />
+    <van-nav-bar title="登录">
+      <template #left>
+        <van-icon name="cross"></van-icon>
+      </template>
+      <!-- <van-icon name="cross" slot="left" /> -->
+    </van-nav-bar>
     <!-- /导航栏 -->
 
     <!-- 登录表单 -->
-    <van-form @submit="onSubmit">
+    <van-form @submit="onSubmit" ref="form">
       <van-cell-group>
         <!-- 表单验证：
         1、给 van-field 组件配置 rules 验证规则
@@ -14,8 +19,7 @@
            如果验证通过，会触发 submit 事件
            如果验证失败，不会触发 submit -->
         <van-field
-          name="手机名"
-          label="手机号"
+          name="mobile"
           type="number"
           placeholder="请输入手机号"
           v-model="user.mobile"
@@ -28,17 +32,28 @@
         </van-field>
         <van-field
           type="number"
-          name="验证码"
-          label="验证码"
+          name="code"
           placeholder="请输入验证码"
           :rules="userFormRules.code"
-          v-model="user.code"
+          v-model.trim="user.code"
           required
           maxlength="6"
         >
           <i slot="left-icon" class="toutiao toutiao-yanzhengma"></i>
           <template #button>
-            <van-button class="send-sms-btn" round size="small" type="default"
+            <van-count-down
+              :time="time"
+              format="剩余 ss 秒"
+              v-if="isCountShow"
+              @finish="isCountShow = false"
+            />
+            <van-button
+              v-else
+              @click="sendCode()"
+              class="send-sms-btn"
+              round
+              size="small"
+              native-type="button"
               >发送验证码</van-button
             >
           </template>
@@ -55,7 +70,7 @@
   </div>
 </template>
 <script>
-import { login } from '@/api/user.js'
+import { login, getCode } from '@/api/user.js'
 export default {
   name: 'LoginIndex',
   components: {},
@@ -63,26 +78,51 @@ export default {
   data () {
     return {
       user: {
-        mobile: '',
-        code: ''
+        mobile: '13911111111',
+        code: '246810'
       },
-      userFormRules: {}
+      userFormRules: {
+        mobile: [
+          { pattern: /^(?:(?:\+|00)86)?1\d{10}$/, message: '不符合手机格式' },
+          { required: true, message: '请输入手机号' }
+        ],
+        code: [
+          { pattern: /^\d{6}$/, message: '验证码长度为6位' },
+          { required: true, message: '请输入验证码' }
+        ]
+      },
+      time: 5 * 1000,
+      isCountShow: false
     }
   },
-  computed: {},
-  watch: {},
-  created () { },
-  mounted () { },
   methods: {
-    async onSubmit () {
-      this.$toast.loading({
-        duration: 0, // 持续时间，0表示持续展示不停止
-        forbidClick: true, // 是否禁止背景点击
-        message: '登录中...' // 提示消息
-      })
+    // 验证码
+    async sendCode () {
       try {
-        const { data: res } = await login(this.user)
-        console.log('登录成功', res)
+        // 发送前先确认手机号码
+        const result = this.$refs.form.validate('mobile')
+        console.log(result)
+        console.log('校验通过')
+        this.isCountShow = true
+        await getCode(this.user.mobile)
+        this.$toast.success('发送成功')
+      } catch (err) {
+        console.log(err)
+        this.$toast.fail('发送失败，请重试')
+      }
+    },
+    // 登录
+    async onSubmit (values) {
+      // console.log('submit', values)
+      // this.$toast.loading({
+      //   duration: 0, // 持续时间，0表示持续展示不停止
+      //   forbidClick: true, // 是否禁止背景点击
+      //   message: '登录中...' // 提示消息
+      // })
+      try {
+        const { data: res } = await login(values)
+        // console.log(res)
+        this.$store.commit('SETUSER', res.data)
         this.$toast.success('登录成功')
       } catch (err) {
         if (err.response.status === 400) {
@@ -96,22 +136,21 @@ export default {
 </script>
 <style scoped lang="less">
 .login-container {
-  .page-nav-bar {
-    background-color: #3296fa;
-    .van-nav-bar__title {
-      color: #fff;
-    }
-  }
   .toutiao {
     font-size: 37px;
   }
   .send-sms-btn {
+    position: fixed;
+    right: 10px;
     width: 152px;
     height: 46px;
     line-height: 46px;
     background-color: #ededed;
     font-size: 22px;
     color: #666;
+    .van-button__text {
+      zoom: 0.9;
+    }
   }
   .login-btn-wrap {
     padding: 53px 33px;
@@ -119,6 +158,10 @@ export default {
       background-color: #6db4fb;
       border: none;
     }
+  }
+  .van-count-down {
+    position: fixed;
+    right: 18px;
   }
 }
 </style>

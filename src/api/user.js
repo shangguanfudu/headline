@@ -5,10 +5,20 @@ import request from '@/utils/request'
 /**
  * 用户登录
  */
-export const login = data => {
+export const login = ({ mobile, code }) => {
   return request({
     method: 'POST',
-    url: '/app/v1_0/authorizations',
-    data
+    url: '/authorizations',
+    data: {
+      mobile,
+      code
+    }
+  })
+}
+
+// 短信验证码
+export const getCode = (mobile) => {
+  return request({
+    url: `/sms/codes/${mobile}`
   })
 }
