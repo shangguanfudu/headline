@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <!-- 导航栏 -->
-    <van-nav-bar title="登录">
+    <van-nav-bar title="登录" @click-left="$router.go('-1')">
       <template #left>
         <van-icon name="cross"></van-icon>
       </template>
@@ -28,6 +28,7 @@
           required
           maxlength="11"
         >
+          <MyIcon iconName="shouji" slot="left-icon"></MyIcon>
           <i slot="left-icon" class="toutiao toutiao-shouji"></i>
         </van-field>
         <van-field
@@ -71,9 +72,11 @@
 </template>
 <script>
 import { login, getCode } from '@/api/user.js'
+import MyIcon from '@/components/MyIcon.vue'
+
 export default {
   name: 'LoginIndex',
-  components: {},
+  components: { MyIcon },
   props: {},
   data () {
     return {
@@ -124,6 +127,7 @@ export default {
         // console.log(res)
         this.$store.commit('SETUSER', res.data)
         this.$toast.success('登录成功')
+        this.$router.push({ name: 'my' })
       } catch (err) {
         if (err.response.status === 400) {
           console.log('登录失败', err)

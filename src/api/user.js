@@ -1,3 +1,4 @@
+import store from '@/store'
 /**
  * 用户相关的请求模块
  */
@@ -20,5 +21,14 @@ export const login = ({ mobile, code }) => {
 export const getCode = (mobile) => {
   return request({
     url: `/sms/codes/${mobile}`
+  })
+}
+// 获取用户信息
+export const getInfo = () => {
+  return request({
+    url: '/user',
+    headers: {
+      Authorization: 'Bearer ' + store.state.user.token
+    }
   })
 }
