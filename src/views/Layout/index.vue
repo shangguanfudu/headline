@@ -1,6 +1,8 @@
 <template>
   <div class="container">
-    <router-view class="main" />
+    <keep-alive :include="['Home']">
+      <router-view class="main" />
+    </keep-alive>
 
     <van-tabbar route>
       <van-tabbar-item replace to="/layout/home">

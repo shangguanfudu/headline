@@ -1,4 +1,4 @@
-import store from '@/store'
+
 /**
  * 用户相关的请求模块
  */
@@ -26,9 +26,18 @@ export const getCode = (mobile) => {
 // 获取用户信息
 export const getInfo = () => {
   return request({
-    url: '/user',
-    headers: {
-      Authorization: 'Bearer ' + store.state.user.token
+    url: '/user'
+
+  })
+}
+
+// 设置用户频道（重置式）
+export const setChannels = (channels) => {
+  return request({
+    method: 'PUT',
+    url: '/user/channels',
+    data: {
+      channels
     }
   })
 }
