@@ -41,3 +41,34 @@ export const setChannels = (channels) => {
     }
   })
 }
+
+/**
+ * 获取用户个人资料
+ */
+// 获取指定用户信息
+export const getUserProfile = () => {
+  return request({
+    method: 'GET',
+    url: '/user/profile'
+  })
+}
+/**
+ * 更新用户信息
+ */
+export const updateUser = data => {
+  return request({
+    method: 'PATCH',
+    url: '/user/profile',
+    data
+  })
+}
+/**
+ * 更新头像
+ */
+export const updateUserAvatar = data => {
+  return request({
+    method: 'PATCH',
+    url: '/user/photo',
+    data
+  })
+}
